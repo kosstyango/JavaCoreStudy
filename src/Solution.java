@@ -1,46 +1,40 @@
 import java.io.*;
 import java.util.Scanner;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-
 import static java.lang.Integer.parseInt;
 
 public class Solution {
     public static void main(String[] args) {
         init();
-
     }
-
     private static void init() {//готовим второй поток
         Thread secThread;
-        Runnable runnable = new Runnable() {
-            @Override //переопределяем run
-            public void run() {
-                Elements data = getWeb();//запускаем работу с сайтом ЦБРФ
-                //Информация о доступных валютах
-                System.out.println("Программа работает с " + (data.size() - 1) + " видами валют по курсу ЦБРФ на текущую дату: ");
-                for (int i = 1; i < data.size(); i++) {
-                    System.out.println(i + ": \t" + data.get(i).children().get(3).text());
-                }
-                System.out.println("Пожалуйста, укажите номер валюты для обмена");
-                int userChoice1 = getCorrectIntCurrancy(data);
-                double currancyRate1 = Double.parseDouble(data.get(userChoice1).children().get(4).text().replace(',', '.'));
-                int currancyQuantity1 = Integer.parseInt(data.get(userChoice1).children().get(2).text());
-
-                System.out.println("Спасибо. В какую валюту желаете конвертировать?");
-                int userChoice2 = getCorrectIntCurrancy(data);
-                double currancyRate2 = Double.parseDouble(data.get(userChoice2).children().get(4).text().replace(',', '.'));
-                int currancyQuantity2 = Integer.parseInt(data.get(userChoice2).children().get(2).text());
-
-                System.out.println("Спасибо. Какую сумму хотите обменять?");
-                int userChoice3 = getCorrectInt();
-
-                double result = (userChoice3*currancyRate1*currancyQuantity2)/(currancyRate2*currancyQuantity1);
-                System.out.println("При обмене "+userChoice3+" "+data.get(userChoice1).children().get(3).text()+" на "+data.get(userChoice2).children().get(3).text()+" Вы получите "+result+" "+data.get(userChoice2).children().get(3).text());
+        //переопределяем run
+        Runnable runnable = () -> {
+            Elements data = getWeb();//запускаем работу с сайтом ЦБРФ
+            //Информация о доступных валютах
+            System.out.println("Программа работает с " + (data.size() - 1) + " видами валют по курсу ЦБРФ на текущую дату: ");
+            for (int i = 1; i < data.size(); i++) {
+                System.out.println(i + ": \t" + data.get(i).children().get(3).text());
             }
+            System.out.println("Пожалуйста, укажите номер валюты для обмена");
+            int userChoice1 = getCorrectIntCurrancy(data);
+            double currancyRate1 = Double.parseDouble(data.get(userChoice1).children().get(4).text().replace(',', '.'));
+            int currancyQuantity1 = Integer.parseInt(data.get(userChoice1).children().get(2).text());
+
+            System.out.println("Спасибо. В какую валюту желаете конвертировать?");
+            int userChoice2 = getCorrectIntCurrancy(data);
+            double currancyRate2 = Double.parseDouble(data.get(userChoice2).children().get(4).text().replace(',', '.'));
+            int currancyQuantity2 = Integer.parseInt(data.get(userChoice2).children().get(2).text());
+
+            System.out.println("Спасибо. Какую сумму хотите обменять?");
+            int userChoice3 = getCorrectInt();
+
+            double result = (userChoice3*currancyRate1*currancyQuantity2)/(currancyRate2*currancyQuantity1);
+            System.out.println("При обмене "+userChoice3+" "+data.get(userChoice1).children().get(3).text()+" на "+data.get(userChoice2).children().get(3).text()+" Вы получите "+result+" "+data.get(userChoice2).children().get(3).text());
         };
         secThread = new Thread(runnable);
         secThread.start();
